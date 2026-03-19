@@ -89,11 +89,12 @@ fn f_prime(v1: f64, v2: f64, a: f64, x: f64) -> f64 {
     }
 }
 
-fn newtown(f: fn(f64) -> f64, x_0: f64, max_itrs: u32, tol: f64) {
+#[allow(unused)]
+fn newton(f: fn(f64) -> f64, x_0: f64, max_itrs: u32, tol: f64) {
     let x_old = x_0;
     let x_n = x_0;
 
     for iteration in 1..max_itrs + 1 {
-        let f_x = f(x_n);
+        let f_x = f(x_0);
     }
 }

@@ -1,6 +1,7 @@
 use crate::vectors::{cross_product, dot_product, magnitude};
 
-mod lambert_eqn;
+mod lambert_eqns;
+mod newton;
 mod stumpff;
 mod vectors;
 
@@ -56,14 +57,4 @@ fn lambert(tof: f64, r1_vector: [f64; 3], r2_vector: [f64; 3], direction: Direct
     let lambert_param = dtheta.sin() * ((r1 * r2) / (1. - dtheta.cos())).sqrt();
 
     let z = 0;
-}
-
-#[allow(unused)]
-fn newton(f: fn(f64) -> f64, x_0: f64, max_itrs: u32, tol: f64) {
-    let x_old = x_0;
-    let x_n = x_0;
-
-    for iteration in 1..max_itrs + 1 {
-        let f_x = f(x_0);
-    }
 }

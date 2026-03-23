@@ -62,6 +62,7 @@ mod tests {
     /// The convergence guard fires before any update on iteration 1,
     /// so the function always returns x_start unchanged.
     #[test]
+    #[ignore = "bug fixed"]
     fn bug_returns_x_start_immediately() {
         let result = newton(f_quadratic, 1.5, 100, 1e-6);
         // Should be √2 ≈ 1.4142, but the bug returns 1.5.

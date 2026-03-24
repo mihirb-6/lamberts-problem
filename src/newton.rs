@@ -1,5 +1,11 @@
 #[allow(unused)]
-pub fn newton(f: fn(f64) -> f64, x_0: f64, max_itrs: u32, tol: f64) -> f64 {
+pub fn newton(
+    f: fn(f64) -> f64,
+    //f_prime: fn(f64) -> f64,
+    x_0: f64,
+    max_itrs: u32,
+    tol: f64,
+) -> f64 {
     const H: f64 = 1e-8; // small step for numerical differentiation
 
     let mut x_old = x_0;
@@ -24,8 +30,12 @@ pub fn newton(f: fn(f64) -> f64, x_0: f64, max_itrs: u32, tol: f64) -> f64 {
     0.
 }
 
+// -------------------------------
+//             TESTS
+// -------------------------------
+
 #[cfg(test)]
-mod tests {
+mod newton_tests {
     use super::*;
 
     // -----------------------------------------------------------------------
@@ -37,8 +47,8 @@ mod tests {
         (a - b).abs() < eps
     }
 
-    // Plain `fn` pointers required by the signature (non-capturing closures
-    // coerce automatically).
+    // Plain `fn` pointers required by the signature
+    // (non-capturing closures coerce automatically).
     fn f_quadratic(x: f64) -> f64 {
         x * x - 2.0
     } // root: √2

@@ -20,6 +20,10 @@ pub fn stumpff_s(x: f64) -> f64 {
     }
 }
 
+// -------------------------------
+//             TESTS
+// -------------------------------
+
 #[cfg(test)]
 mod stumpff_tests {
     use super::*;

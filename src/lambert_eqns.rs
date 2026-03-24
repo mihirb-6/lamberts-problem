@@ -3,18 +3,18 @@ use std::f64::consts::SQRT_2;
 pub static MU: f64 = 3.986004418e5; // [km^3 s^-2]
 
 #[allow(unused)]
-fn y(v1: f64, v2: f64, a: f64, x: f64) -> f64 {
+pub fn y(v1: f64, v2: f64, a: f64, x: f64) -> f64 {
     v1 + v2 + (a * (x * stumpff_s(x) - 1.) / stumpff_c(x))
 }
 
 #[allow(unused)]
-fn f(v1: f64, v2: f64, a: f64, x: f64, dt: f64) -> f64 {
+pub fn f(v1: f64, v2: f64, a: f64, x: f64, dt: f64) -> f64 {
     ((y(v1, v2, a, x) / stumpff_c(x)).powf(1.5) * stumpff_s(x)) + (a * y(v1, v2, a, x).sqrt())
         - MU.sqrt() * dt
 }
 
 #[allow(unused)]
-fn f_prime(v1: f64, v2: f64, a: f64, x: f64) -> f64 {
+pub fn f_prime(v1: f64, v2: f64, a: f64, x: f64) -> f64 {
     let s_div_c = stumpff_s(x) / stumpff_c(x);
     let y_div_c = y(v1, v2, a, x) / stumpff_c(x);
     let c_div_y = stumpff_c(x) / y(v1, v2, a, x);

@@ -1,9 +1,11 @@
-use crate::vectors::{cross_product, dot_product, magnitude};
-
 mod lambert_eqns;
 mod newton;
 mod stumpff;
 mod vectors;
+
+use crate::lambert_eqns::{f, f_prime, y};
+use crate::stumpff::{stumpff_c, stumpff_s};
+use crate::vectors::{cross_product, dot_product, magnitude};
 
 fn main() {
     let _dt: f64 = 5.0 * 3600.; // [s]

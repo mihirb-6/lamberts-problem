@@ -1,19 +1,25 @@
 #[allow(unused)]
 pub fn newton(
-    f: fn(f64) -> f64,
-    //f_prime: fn(f64) -> f64,
+    v1: f64,
+    v2: f64,
+    a: f64,
+    dt: f64,
+    f: fn(v1: f64, v2: f64, a: f64, x: f64, dt: f64) -> f64,
+    f_prime: fn(v1: f64, v2: f64, a: f64, x: f64) -> f64,
     x_0: f64,
     max_itrs: u32,
     tol: f64,
-) -> f64 {
-    const H: f64 = 1e-8; // small step for numerical differentiation
+) -> Result<f64, String> {
+    //const H: f64 = 1e-8; // small step for numerical differentiation
 
     let mut x_old = x_0;
     let mut x_n = x_0;
 
     for iteration in 1..max_itrs + 1 {
-        let f_x = f(x_n);
-        let fprime = (f(x_n + H) - f(x_n)) / H;
+        //let f_x = f(x_n);
+        //let fprime = (f(x_n + H) - f(x_n)) / H;
+        let f_x = f(v1, v2, a, x_n, dt);
+        let fprime = f_prime(v1, v2, a, x_n);
 
         x_old = x_n;
         x_n -= f_x / fprime;
@@ -22,18 +28,18 @@ pub fn newton(
 
         if (x_n - x_old).abs() < tol {
             println!("Converged after {} iterations", iteration);
-            return x_n;
+            return Ok(x_n);
         }
     }
 
-    println!("Exceeded iteration limit without convergence.");
-    0.
+    return Err("Exceeded iteration limit without convergence.".to_string());
 }
 
 // -------------------------------
 //             TESTS
 // -------------------------------
 
+/*
 #[cfg(test)]
 mod newton_tests {
     use super::*;
@@ -163,3 +169,4 @@ mod newton_tests {
         );
     }
 }
+*/

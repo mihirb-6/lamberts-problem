@@ -3,15 +3,18 @@ mod newton;
 mod stumpff;
 mod vectors;
 
-use crate::lambert_eqns::{f, f_prime, y};
+use crate::lambert_eqns::{MU, f, f_prime, y};
 use crate::stumpff::{stumpff_c, stumpff_s};
 use crate::vectors::{cross_product, dot_product, magnitude};
 
 fn main() {
     let _dt: f64 = 5.0 * 3600.; // [s]
-    let _r1: [f64; 3] = [1., 2., 3.];
-    let _r2: [f64; 3] = [4., 5., 6.];
+    let _r1: [f64; 3] = [5000., 10000., 2100.];
+    let _r2: [f64; 3] = [-14600., 2500., 7000.];
     let _z_guess = 1.;
+    let ti = 0.;
+    let tf = 1. * 60. * 60.;
+    let dt = tf - ti;
 }
 
 #[allow(unused)]
@@ -21,7 +24,14 @@ enum Direction {
 }
 
 #[allow(unused)]
-fn lambert(tof: f64, r1_vector: [f64; 3], r2_vector: [f64; 3], direction: Direction, z_guess: f64) {
+fn lambert(
+    tof: f64,
+    r1_vector: [f64; 3],
+    r2_vector: [f64; 3],
+    direction: Direction,
+    z_guess: f64,
+    dt: f64,
+) {
     let r1 = magnitude(&r1_vector);
     let r2 = magnitude(&r2_vector);
 
@@ -56,7 +66,10 @@ fn lambert(tof: f64, r1_vector: [f64; 3], r2_vector: [f64; 3], direction: Direct
 
     // Compute Lambert Parameter A
     // Howard Curtis Eqn. (5.35) pg. 205
-    let lambert_param = dtheta.sin() * ((r1 * r2) / (1. - dtheta.cos())).sqrt();
+    //
+    let lambert_a = dtheta.sin() * ((r1 * r2) / (1. - dtheta.cos())).sqrt();
 
-    let z = 0;
+    let z_initial = MU.sqrt() * dt / lambert_a;
+    
+    
 }

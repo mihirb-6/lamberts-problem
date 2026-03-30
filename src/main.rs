@@ -1,3 +1,5 @@
+use nalgebra::Vector3;
+
 mod lagrange_coeffs;
 mod lambert_eqns;
 mod newton;
@@ -25,6 +27,13 @@ fn main() {
 enum Direction {
     Prograde,
     Retrograde,
+}
+
+#[allow(unused)]
+struct Vector {
+    x: f64,
+    y: f64,
+    z: f64,
 }
 
 #[allow(unused)]
@@ -85,7 +94,12 @@ fn lambert(r1_vector: [f64; 3], r2_vector: [f64; 3], direction: Direction, dt: f
         f, fdot, g, gdot
     );
 
+    let r1v = Vector3::from(r1_vector);
+    let r2v = Vector3::from(r2_vector);
+
     // Compute v1 and v2
-    //v1 = 1/g * (r2_vector - f*r1_vector)
-    //v2 = 1/g * (gdot*r2_vevtor - r1_vector)
+    let v1 = 1. / g * (r2v - f * r1v);
+    let v2 = 1. / g * (gdot * r2v - r1v);
+
+    println!("v1 = {:.4}\nv2 = {:.4}", v1, v2);
 }

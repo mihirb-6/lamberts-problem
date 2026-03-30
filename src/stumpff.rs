@@ -1,18 +1,20 @@
 pub fn stumpff_c(x: f64) -> f64 {
     match x {
+        x if x == 0. => 0.5,
         x if x.abs() < 1e-6 => (1. / 2.) - (x / 24.) + (x * x / 720.),
         x if x > 0. => (1. - x.sqrt().cos()) / x, // small but nonzero z
         x if x < 0. => (1. - (-x).sqrt().cosh()) / x,
-        _ => panic!("NaN value passed into stumpff_c"),
+        _ => panic!("stumpff_c panicked"),
     }
 }
 
 pub fn stumpff_s(x: f64) -> f64 {
     match x {
+        x if x == 0. => 1. / 6.,
         x if x.abs() < 1e-6 => (1. / 6.) - (x / 120.) + (x * x / 5040.), // small but nonzero z
-        x if x > 0. => (x.sqrt() - x.sqrt().sin()) / x.powi(3).sqrt(),
-        x if x < 0. => ((-x).sqrt().sinh() - (-x).sqrt()) / (-x).powi(3).sqrt(),
-        _ => panic!("NaN value passed into stumpff_s"),
+        x if x > 0. => (x.sqrt() - x.sqrt().sin()) / x.sqrt().powi(3),
+        x if x < 0. => ((-x).sqrt().sinh() - (-x).sqrt()) / (-x).sqrt().powi(3),
+        _ => panic!("stumpff_s panicked"),
     }
 }
 

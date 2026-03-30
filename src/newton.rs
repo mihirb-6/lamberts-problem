@@ -9,8 +9,7 @@ pub fn newton(
     max_itrs: u32,
     tol: f64,
 ) -> Result<f64, String> {
-    //const H: f64 = 1e-8; // small step for numerical differentiation
-
+    println!("-----Newton's Method Output-----");
     let mut x_i = x_0;
 
     for iteration in 1..max_itrs + 1 {
@@ -20,19 +19,19 @@ pub fn newton(
         let x_next = x_i - (f_x / fprime);
 
         if (x_next - x_i).abs() < tol {
-            println!("Converged after {} iterations", iteration);
+            println!("-----Converged after {} iterations-----", iteration);
             return Ok(x_next);
         }
 
-        x_i = x_next;
-
         println!(
-            "Itr {}: z = {} || f(z) = {} || f'(z) = {}",
+            "Itr {}: z = {:.5}  |  f(z) = {:.2}  |   f'(z) = {:.2}",
             iteration, x_i, f_x, fprime
         );
+
+        x_i = x_next;
     }
 
-    Err("Exceeded iteration limit without convergence.".to_string())
+    Err("-----Exceeded iteration limit without convergence-----".to_string())
 }
 
 // -------------------------------

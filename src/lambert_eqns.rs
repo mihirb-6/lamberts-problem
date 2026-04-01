@@ -1,6 +1,6 @@
+use crate::constants::MU;
 use crate::stumpff::{stumpff_c, stumpff_s};
 use std::f64::{NAN, consts::SQRT_2};
-pub static MU: f64 = 3.986004418e5; // [km^3 s^-2]
 
 pub fn y(r1: f64, r2: f64, a: f64, x: f64) -> Result<f64, String> {
     if x != NAN {

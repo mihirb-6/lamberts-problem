@@ -1,4 +1,5 @@
-use crate::lambert_eqns::{MU, y};
+use crate::constants::MU;
+use crate::lambert_eqns::y;
 use crate::stumpff::{stumpff_c, stumpff_s};
 
 #[allow(unused)]

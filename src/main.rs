@@ -8,6 +8,7 @@ mod newton;
 mod stumpff;
 mod vectors;
 
+use crate::constants::MU;
 use crate::elements::get_elements;
 use crate::lagrange_coeffs::{lagrange_f, lagrange_fdot, lagrange_g, lagrange_gdot};
 use crate::newton::newton;
@@ -32,15 +33,38 @@ fn main() {
     let w = elements.a.to_degrees();
     let theta = elements.b.to_degrees();
 
+    // Perigee and Apogee Radii
+    let r_p = (h.powi(2) / MU) * 1. / (1. + e * 0_f64.cos());
+    let r_a = (h.powi(2) / MU) * 1. / (1. + e * 180_f64.to_radians().cos());
+
+    // Semimajor Axis
+    let a = 0.5 * (r_p + r_a);
+
+    // Period
+    let period = 2. * PI / MU.sqrt() * a.powf(1.5);
+
+    // Eccentric Anomaly
+    let e1 = 2. * (((1. - e) / (1. + e)).sqrt() * (theta.to_radians() / 2.).tan()).atan();
+
+    // Mean Anomaly
+    let me1 = e1 - (e * e1.sin());
+
+    // Time since periapsis
+    let t_1 = (h.powi(3) / MU.powi(2)) * 1. / (1. - e.powi(2)).powf(1.5) * me1;
+
+    // Orbital Elements Print Statement
     println!(
         "
+        a = {a:.4} [km]\n
         e = {e:.4}\n
         h = {h:.2} [km^2 s^-1]\n
         i = {i:.2}°\n
         RAAN = {raan:.2}°\n
         w = {w:.2}°\n
         theta = {theta:.2}°\n"
-    )
+    );
+
+    println!("Perigee encounter in {t_1:.1} s");
 }
 
 #[allow(unused)]

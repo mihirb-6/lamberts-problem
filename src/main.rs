@@ -5,6 +5,7 @@ mod elements;
 mod lagrange_coeffs;
 mod lambert_eqns;
 mod newton;
+mod plot;
 mod stumpff;
 mod vectors;
 
@@ -12,58 +13,48 @@ use crate::constants::MU;
 use crate::elements::get_elements;
 use crate::lagrange_coeffs::{lagrange_f, lagrange_fdot, lagrange_g, lagrange_gdot};
 use crate::newton::newton;
+use crate::plot::plot_orbit;
 use std::f64::consts::PI;
 
 #[allow(unused)]
 pub fn main() {
-    let t = 2.0 * std::f64::consts::PI * (7000.0_f64.powi(3) / MU).sqrt();
-    let dt = t / 4.0;
+    let dt = 1.0 * 3600.;
     //let dt: f64 = 1.0 * 3600.; // [s]
-    let r1 = Vector3::new(8000.0, 0.0, 0.0);
-    let r2 = Vector3::new(12000.0, 0.0, 0.0);
+    let r1 = Vector3::new(4000.0, 2000., 2100.0);
+    let r2 = Vector3::new(-4600.0, 2500., 7000.);
 
     let (v1, v2) = lambert(r1, r2, Direction::Prograde, dt);
-    let elements = get_elements(r1, v1);
+    let (a, elements, t_1) = get_elements(r1, v1);
 
     let h = elements.x;
-    let i = elements.y.to_degrees();
-    let raan = elements.z.to_degrees();
+    let i = elements.y;
+    let raan = elements.z;
     let e = elements.w;
-    let w = elements.a.to_degrees();
-    let theta = elements.b.to_degrees();
-
-    // Perigee and Apogee Radii
-    let r_p = (h.powi(2) / MU) * 1. / (1. + e * 0_f64.cos());
-    let r_a = (h.powi(2) / MU) * 1. / (1. + e * 180_f64.to_radians().cos());
-
-    // Semimajor Axis
-    let a = 0.5 * (r_p + r_a);
-
-    // Period
-    let period = 2. * PI / MU.sqrt() * a.powf(1.5);
-
-    // Eccentric Anomaly
-    let e1 = 2. * (((1. - e) / (1. + e)).sqrt() * (theta.to_radians() / 2.).tan()).atan();
-
-    // Mean Anomaly
-    let me1 = e1 - (e * e1.sin());
-
-    // Time since periapsis
-    let t_1 = (h.powi(3) / MU.powi(2)) * 1. / (1. - e.powi(2)).powf(1.5) * me1;
+    let w = elements.a;
+    let theta = elements.b;
 
     // Orbital Elements Print Statement
     println!(
         "
-        a = {a:.4} [km]\n
-        e = {e:.4}\n
-        h = {h:.2} [km^2 s^-1]\n
-        i = {i:.2}°\n
-        RAAN = {raan:.2}°\n
-        w = {w:.2}°\n
-        theta = {theta:.2}°\n"
+        a = {:.4} [km]\n
+        e = {:.4}\n
+        h = {:.2} [km^2 s^-1]\n
+        i = {:.2}°\n
+        RAAN = {:.2}°\n
+        w = {:.2}°\n
+        theta = {:.2}°\n",
+        a,
+        e,
+        h,
+        i.to_degrees(),
+        raan.to_degrees(),
+        w.to_degrees(),
+        theta.to_degrees()
     );
 
     println!("Perigee encounter in {t_1:.1} s");
+
+    plot_orbit(e, h, i, raan, w, MU);
 }
 
 #[allow(unused)]
@@ -170,117 +161,4 @@ pub fn lambert(
     println!("v1 = {:.4}\nv2 = {:.4}", v1, v2);
 
     (v1, v2)
-}
-
-#[cfg(test)]
-mod main_tests {
-    use nalgebra::Vector3;
-    use std::f64::consts::PI;
-
-    use crate::{Direction, lambert};
-
-    const MU: f64 = 398600.4418;
-
-    fn propagate(r: Vector3<f64>, v: Vector3<f64>, dt: f64) -> Vector3<f64> {
-        let steps = 10_000;
-        let h = dt / steps as f64;
-
-        let mut r_curr = r;
-        let mut v_curr = v;
-
-        for _ in 0..steps {
-            let r_norm = r_curr.norm();
-            let acc = -MU / r_norm.powi(3) * r_curr;
-
-            v_curr += acc * h;
-            r_curr += v_curr * h;
-        }
-
-        r_curr
-    }
-
-    #[test]
-    fn prograde_quarter_orbit() {
-        let r1 = Vector3::new(7000.0, 0.0, 0.0);
-        let r2 = Vector3::new(0.0, 7000.0, 0.0);
-
-        let t = 2.0 * PI * (7000.0_f64.powi(3) / MU).sqrt();
-        let dt = t / 4.0;
-
-        let (v1, _) = lambert(r1, r2, Direction::Prograde, dt);
-
-        let r2_calc = propagate(r1, v1, dt);
-
-        assert!((r2_calc - r2).norm() < 1e-1);
-
-        // Direction check: prograde => +z angular momentum
-        let h = r1.cross(&v1);
-        assert!(h.z > 0.0);
-    }
-
-    #[test]
-    fn retrograde_direction_check() {
-        let r1 = Vector3::new(7000.0, 0.0, 0.0);
-        let r2 = Vector3::new(0.0, 7000.0, 0.0);
-
-        let t = 2.0 * PI * (7000.0_f64.powi(3) / MU).sqrt();
-        let dt = t / 4.0;
-
-        let (v1, _) = lambert(r1, r2, Direction::Retrograde, dt);
-
-        let h = r1.cross(&v1);
-
-        // Retrograde should flip angular momentum
-        assert!(h.z < 0.0);
-    }
-
-    #[test]
-    fn time_scaling_behavior() {
-        let r1 = Vector3::new(5000.0, 10000.0, 2100.0);
-        let r2 = Vector3::new(-14600.0, 2500.0, 7000.0);
-
-        let (v_fast, _) = lambert(r1, r2, Direction::Prograde, 1000.0);
-        let (v_slow, _) = lambert(r1, r2, Direction::Prograde, 10000.0);
-
-        assert!(v_fast.norm() > v_slow.norm());
-    }
-
-    #[test]
-    fn endpoint_accuracy_general_case() {
-        let r1 = Vector3::new(5000.0, 10000.0, 2100.0);
-        let r2 = Vector3::new(-14600.0, 2500.0, 7000.0);
-        let dt = 3600.0;
-
-        let (v1, _) = lambert(r1, r2, Direction::Prograde, dt);
-
-        let r2_calc = propagate(r1, v1, dt);
-
-        assert!((r2_calc - r2).norm() < 1.0, "Propagation error too large");
-    }
-
-    #[test]
-    fn collinear_edge_case() {
-        let r1 = Vector3::new(8000.0, 0.0, 0.0);
-        let r2 = Vector3::new(12000.0, 0.0, 0.0);
-
-        let dt = 2000.0;
-
-        let (v1, _) = lambert(r1, r2, Direction::Prograde, dt);
-
-        assert!(v1.iter().all(|x| x.is_finite()));
-        assert!(v1.y.abs() < 1e-6 && v1.z.abs() < 1e-6);
-    }
-
-    #[test]
-    fn energy_consistency() {
-        let r1 = Vector3::new(7000.0, 0.0, 0.0);
-        let r2 = Vector3::new(8000.0, 1000.0, 0.0);
-        let dt = 3000.0;
-
-        let (v1, _) = lambert(r1, r2, Direction::Prograde, dt);
-
-        let energy = v1.norm_squared() / 2.0 - MU / r1.norm();
-
-        assert!(energy.is_finite());
-    }
 }

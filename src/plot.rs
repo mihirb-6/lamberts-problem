@@ -42,16 +42,13 @@ pub fn plot_orbit(e: f64, h: f64, i: f64, raan: f64, w: f64, mu: f64) {
     let points_eci: Vec<Vector3<f64>> = points_pf.iter().map(|r| transform * r).collect();
 
     // Set up plot
-    let root = BitMapBackend::new("orbit.png", (800, 800)).into_drawing_area();
+    let root = BitMapBackend::new("orbit.png", (1500, 1500)).into_drawing_area();
     root.fill(&BLACK).unwrap();
 
     let mut chart = ChartBuilder::on(&root)
         .margin(10)
-        .caption(
-            "Orbit Plot (B/W)",
-            ("sans-serif", 20).into_font().color(&WHITE),
-        )
-        .build_cartesian_2d(-5000f64..5000f64, -5000f64..5000f64)
+        .caption("Orbit Plot", ("sans-serif", 20).into_font().color(&WHITE))
+        .build_cartesian_2d(-1e6f64..1e6f64, -1e6f64..1e6f64)
         .unwrap();
 
     // Configure mesh with white grid lines and labels
@@ -75,7 +72,7 @@ pub fn plot_orbit(e: f64, h: f64, i: f64, raan: f64, w: f64, mu: f64) {
 
     // main body
     chart
-        .draw_series(std::iter::once(Circle::new((0.0, 0.0), 10, BLUE.filled())))
+        .draw_series(std::iter::once(Circle::new((0.0, 0.0), 5, BLUE.filled())))
         .unwrap();
 
     root.present().unwrap();

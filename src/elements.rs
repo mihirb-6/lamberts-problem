@@ -4,8 +4,15 @@ use nalgebra::{Vector3, Vector6};
 
 use crate::constants::MU;
 
-#[allow(unused)]
-pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>) -> (f64, Vector6<f64>, f64) {
+// ------- get_elements --------
+// Inputs:
+//         r: position vector at time t
+//         v: velocity vector at time t
+// Outputs:
+//         (a): semi-major axis
+//         (elements): 6 orbital elements [h, i, raan, e, w, theta]
+//         (t_1): time since pariapsis
+pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>) -> (f64, Vector6<f64>, f64, f64, f64) {
     // Distance (r)
     let mag_r = r.magnitude();
 
@@ -16,8 +23,8 @@ pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>) -> (f64, Vector6<f64>, f64
     let vr = r.dot(&v) / mag_r;
 
     match vr {
-        vr if vr > 0. => println!("Satellite is flying away from periapsis"),
-        vr if vr < 0. => println!("Satellite is flying towards periapsis"),
+        vr if vr > 0. => println!("-> Object is flying away from periapsis"),
+        vr if vr < 0. => println!("-> Object is flying towards periapsis"),
         _ => println!("vr = 0"),
     }
 
@@ -68,12 +75,11 @@ pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>) -> (f64, Vector6<f64>, f64
     let r_p = (mag_h.powi(2) / MU) * 1. / (1. + mag_e * 0_f64.cos());
     let r_a = (mag_h.powi(2) / MU) * 1. / (1. + mag_e * 180_f64.to_radians().cos());
 
-    println!("rp = {}, ra = {}", r_p, r_a);
-
     // Semimajor Axis
     let a = 0.5 * (r_p + r_a);
 
     // Period
+    #[allow(unused)]
     let period = 2. * PI / MU.sqrt() * a.powf(1.5);
 
     // Eccentric Anomaly
@@ -85,5 +91,11 @@ pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>) -> (f64, Vector6<f64>, f64
     // Time since periapsis
     let t_1 = (mag_h.powi(3) / MU.powi(2)) * 1. / (1. - mag_e.powi(2)).powf(1.5) * me1;
 
-    (a, Vector6::new(mag_h, i, raan, mag_e, w, theta), t_1)
+    (
+        a,
+        Vector6::new(mag_h, i, raan, mag_e, w, theta),
+        t_1,
+        r_p,
+        r_a,
+    )
 }

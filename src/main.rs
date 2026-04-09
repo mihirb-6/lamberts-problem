@@ -18,13 +18,12 @@ use std::f64::consts::PI;
 
 #[allow(unused)]
 pub fn main() {
-    let dt = 1.0 * 3600.;
-    //let dt: f64 = 1.0 * 3600.; // [s]
-    let r1 = Vector3::new(4000.0, 2000., 2100.0);
-    let r2 = Vector3::new(-4600.0, 2500., 7000.);
+    let dt: f64 = 500. * 3600.; // [s]
+    let r1 = Vector3::new(403673.0, 373623., -687654.0);
+    let r2 = Vector3::new(-123440.0, -682325., -357493.);
 
     let (v1, v2) = lambert(r1, r2, Direction::Prograde, dt);
-    let (a, elements, t_1) = get_elements(r1, v1);
+    let (a, elements, t_1, r_p, r_a) = get_elements(r1, v1);
 
     let h = elements.x;
     let i = elements.y;
@@ -34,25 +33,23 @@ pub fn main() {
     let theta = elements.b;
 
     // Orbital Elements Print Statement
+    println!("-----Orbital Elements------");
+    println!("Semi-major axis: a = {:.4} [km]", a);
+    println!("Periapsis: r_p = {:.4} [km]", r_p);
+    println!("Apoapsis: r_a = {:.4} [km]", r_a);
+    println!("Eccentricity: e = {:.4}", e);
+    println!("Specific Angular Momentum: h = {:.2} [km^2 s^-1]", h);
+    println!("Inclination: i = {:.2}°", i.to_degrees());
+    println!("RA of Ascending Node (Ω): = {:.2}°", raan.to_degrees());
+    println!("Argument of Periapsis (ω) = {:.2}°", w.to_degrees());
+    println!("True Anomaly (θ) = {:.2}°", theta.to_degrees());
+    println!("----------------------------");
     println!(
-        "
-        a = {:.4} [km]\n
-        e = {:.4}\n
-        h = {:.2} [km^2 s^-1]\n
-        i = {:.2}°\n
-        RAAN = {:.2}°\n
-        w = {:.2}°\n
-        theta = {:.2}°\n",
-        a,
-        e,
-        h,
-        i.to_degrees(),
-        raan.to_degrees(),
-        w.to_degrees(),
-        theta.to_degrees()
+        "Perigee encounter in {:.1} s = {:.2} min = {:.2} hr(s)",
+        t_1,
+        t_1 / 60.,
+        t_1 / 3600.
     );
-
-    println!("Perigee encounter in {t_1:.1} s");
 
     plot_orbit(e, h, i, raan, w, MU);
 }
@@ -63,7 +60,7 @@ pub enum Direction {
     Retrograde,
 }
 
-pub fn lambert(
+fn lambert(
     r1_vector: Vector3<f64>,
     r2_vector: Vector3<f64>,
     direction: Direction,
@@ -71,11 +68,11 @@ pub fn lambert(
 ) -> (Vector3<f64>, Vector3<f64>) {
     let r1 = r1_vector.magnitude();
     let r2 = r2_vector.magnitude();
-    println!("r1 = {}, r2 = {}", r1, r2);
+    //println!("r1 = {}, r2 = {}", r1, r2);
 
     // Compute dot product of r1 and r2
     let r1_dot_r2 = r1_vector.dot(&r2_vector);
-    println!("r1 dot r2 = {}", r1_dot_r2);
+    //println!("r1 dot r2 = {}", r1_dot_r2);
 
     // Compute the cross product of r1 and r2
     let r1_cross_r2 = r1_vector.cross(&r2_vector);
@@ -115,27 +112,23 @@ pub fn lambert(
         dtheta = PI - eps;
     }
 
-    println!(
-        "dtheta = {:.2 } rad = {:.2} deg",
-        dtheta,
-        dtheta.to_degrees()
-    );
+    //println!("dtheta = {:.2 } rad = {:.2} deg",dtheta,dtheta.to_degrees());
 
     // Compute Lambert Parameter A
     // Howard Curtis Eqn. (5.35) pg. 205
     let lambert_a = dtheta.sin() * ((r1 * r2) / (1. - dtheta.cos())).sqrt();
-    println!("A = {:.2}", lambert_a);
+    //println!("A = {:.2}", lambert_a);
 
-    let z_initial = 1.5; //MU.sqrt() * dt / lambert_a;
-    println!("z0 = {}", z_initial);
+    let z_initial = 0.; //MU.sqrt() * dt / lambert_a;
+    //println!("z0 = {}", z_initial);
 
-    let max_iterations = 100;
-    let tolerance = 1e-6;
+    let max_iterations = 500;
+    let tolerance = 1e-9;
 
     let z_root = newton(r1, r2, lambert_a, dt, z_initial, max_iterations, tolerance)
         .unwrap_or_else(|e| panic!("{}", e));
 
-    println!("Root of z: {:.5}", z_root);
+    println!("-> Root of z: {:.5}", z_root);
 
     // Calculate lagrange coefficients
     let f = lagrange_f(r1, r2, lambert_a, z_root);
@@ -145,10 +138,12 @@ pub fn lambert(
     let gdot = lagrange_gdot(r1, r2, lambert_a, z_root);
 
     // Lagrange Coeff. Print Statement
+    /*
     println!(
         "f = {:.4}\nfdot = {:.4}\ng = {:.4} s\ngdot = {:.4}",
         f, fdot, g, gdot
     );
+    */
 
     let r1v = Vector3::from(r1_vector);
     let r2v = Vector3::from(r2_vector);
@@ -158,7 +153,7 @@ pub fn lambert(
     let v2 = 1. / g * (gdot * r2v - r1v);
 
     // v1, v2 Print Statement
-    println!("v1 = {:.4}\nv2 = {:.4}", v1, v2);
+    //println!("v1 = {:.4}\nv2 = {:.4}", v1, v2);
 
     (v1, v2)
 }

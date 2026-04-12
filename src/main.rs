@@ -19,8 +19,8 @@ use std::f64::consts::PI;
 #[allow(unused)]
 pub fn main() {
     let dt: f64 = 500. * 3600.; // [s]
-    let r1 = Vector3::new(403673.0, 373623., -687654.0);
-    let r2 = Vector3::new(-123440.0, -682325., -357493.);
+    let r1 = Vector3::new(4673.0, 3623., -6654.0);
+    let r2 = Vector3::new(-1230.0, -6825., -3493.);
 
     let (v1, v2) = lambert(r1, r2, Direction::Prograde, dt);
     let (a, elements, t_1, r_p, r_a) = get_elements(r1, v1);

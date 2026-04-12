@@ -48,7 +48,7 @@ pub fn plot_orbit(e: f64, h: f64, i: f64, raan: f64, w: f64, mu: f64) {
     let mut chart = ChartBuilder::on(&root)
         .margin(10)
         .caption("Orbit Plot", ("sans-serif", 20).into_font().color(&WHITE))
-        .build_cartesian_2d(-1e6f64..1e6f64, -1e6f64..1e6f64)
+        .build_cartesian_2d(-1e5f64..1e5f64, -1e5f64..1e5f64)
         .unwrap();
 
     // Configure mesh with white grid lines and labels

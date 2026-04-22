@@ -1,4 +1,3 @@
-use crate::constants::MU;
 use crate::stumpff::{stumpff_c, stumpff_s};
 use std::f64::{NAN, consts::SQRT_2};
 
@@ -9,10 +8,10 @@ pub fn y(r1: f64, r2: f64, a: f64, x: f64) -> Result<f64, String> {
     Err("Bad value passed into y(z)".to_string())
 }
 
-pub fn f(r1: f64, r2: f64, a: f64, x: f64, dt: f64) -> f64 {
+pub fn f(r1: f64, r2: f64, a: f64, x: f64, dt: f64, mu:f64) -> f64 {
     let y_uw = y(r1, r2, a, x).unwrap();
 
-    ((y_uw / stumpff_c(x)).powf(1.5) * stumpff_s(x)) + (a * y_uw.sqrt()) - (MU.sqrt() * dt)
+    ((y_uw / stumpff_c(x)).powf(1.5) * stumpff_s(x)) + (a * y_uw.sqrt()) - (mu.sqrt() * dt)
 }
 
 pub fn f_prime(r1: f64, r2: f64, a: f64, x: f64) -> f64 {

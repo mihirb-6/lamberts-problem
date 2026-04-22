@@ -2,8 +2,6 @@ use std::f64::consts::PI;
 
 use nalgebra::{Vector3, Vector6};
 
-use crate::constants::MU;
-
 // ------- get_elements --------
 // Inputs:
 //         r: position vector at time t
@@ -12,7 +10,11 @@ use crate::constants::MU;
 //         (a): semi-major axis
 //         (elements): 6 orbital elements [h, i, raan, e, w, theta]
 //         (t_1): time since pariapsis
-pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>) -> (f64, Vector6<f64>, f64, f64, f64) {
+pub fn get_elements(
+    r: Vector3<f64>,
+    v: Vector3<f64>,
+    mu: f64,
+) -> (f64, Vector6<f64>, f64, f64, f64) {
     // Distance (r)
     let mag_r = r.magnitude();
 
@@ -52,7 +54,7 @@ pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>) -> (f64, Vector6<f64>, f64
     }
 
     // Eccentricity Vecotor (e)
-    let e = (1. / MU) * ((mag_v.powi(2) - (MU / mag_r)) * &r - (mag_r * vr * &v));
+    let e = (1. / mu) * ((mag_v.powi(2) - (mu / mag_r)) * &r - (mag_r * vr * &v));
 
     // Eccentricity: 4th Element
     let mag_e = e.magnitude();
@@ -72,15 +74,15 @@ pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>) -> (f64, Vector6<f64>, f64
     }
 
     // Perigee and Apogee Radii
-    let r_p = (mag_h.powi(2) / MU) * 1. / (1. + mag_e * 0_f64.cos());
-    let r_a = (mag_h.powi(2) / MU) * 1. / (1. + mag_e * 180_f64.to_radians().cos());
+    let r_p = (mag_h.powi(2) / mu) * 1. / (1. + mag_e * 0_f64.cos());
+    let r_a = (mag_h.powi(2) / mu) * 1. / (1. + mag_e * 180_f64.to_radians().cos());
 
     // Semimajor Axis
     let a = 0.5 * (r_p + r_a);
 
     // Period
     #[allow(unused)]
-    let period = 2. * PI / MU.sqrt() * a.powf(1.5);
+    let period = 2. * PI / mu.sqrt() * a.powf(1.5);
 
     // Eccentric Anomaly
     let e1 = 2. * (((1. - mag_e) / (1. + mag_e)).sqrt() * (theta / 2.).tan()).atan();
@@ -89,7 +91,7 @@ pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>) -> (f64, Vector6<f64>, f64
     let me1 = e1 - (mag_e * e1.sin());
 
     // Time since periapsis
-    let t_1 = (mag_h.powi(3) / MU.powi(2)) * 1. / (1. - mag_e.powi(2)).powf(1.5) * me1;
+    let t_1 = (mag_h.powi(3) / mu.powi(2)) * 1. / (1. - mag_e.powi(2)).powf(1.5) * me1;
 
     (
         a,

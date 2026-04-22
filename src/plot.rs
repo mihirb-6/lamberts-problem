@@ -1,7 +1,7 @@
 use nalgebra::{Matrix3, Vector3};
 use plotters::prelude::*;
 
-pub fn plot_orbit(e: f64, h: f64, i: f64, raan: f64, w: f64, mu: f64) {
+pub fn plot_orbit(e: f64, h: f64, i: f64, raan: f64, w: f64, mu: f64, chart_size: f64) {
     let theta_sweep: Vec<f64> = (0..500)
         .map(|k| k as f64 * 2.0 * std::f64::consts::PI / 500.0)
         .collect();
@@ -45,10 +45,12 @@ pub fn plot_orbit(e: f64, h: f64, i: f64, raan: f64, w: f64, mu: f64) {
     let root = BitMapBackend::new("orbit.png", (1500, 1500)).into_drawing_area();
     root.fill(&BLACK).unwrap();
 
+    //let chart_length = 1e5f64;
+
     let mut chart = ChartBuilder::on(&root)
         .margin(10)
         .caption("Orbit Plot", ("sans-serif", 20).into_font().color(&WHITE))
-        .build_cartesian_2d(-1e5f64..1e5f64, -1e5f64..1e5f64)
+        .build_cartesian_2d(-chart_size..chart_size, -chart_size..chart_size)
         .unwrap();
 
     // Configure mesh with white grid lines and labels

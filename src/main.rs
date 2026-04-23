@@ -1,6 +1,14 @@
 use nalgebra::{Vector3, Vector6};
-use std::io::{self, Write};
+use serde::Deserialize;
+use serde::Serialize;
+use std::collections::HashMap;
+use std::error::Error;
+use std::fs;
+use std::fs::File;
+use std::io::{self, BufReader, Write};
+use std::path::{Path, PathBuf};
 use std::process::exit;
+use structopt::StructOpt;
 
 mod elements;
 mod julian_date;
@@ -16,21 +24,46 @@ use crate::elements::get_elements;
 use crate::lambert_soln::{Direction, lambert};
 #[allow(unused)]
 use crate::plot::plot_orbit;
-use serde::Serialize;
-use serde_json;
-use std::collections::HashMap;
-use std::fs;
+
+#[derive(Debug, StructOpt)]
+struct Opts {
+    #[structopt(parse(from_os_str))]
+    infile: PathBuf,
+
+    #[structopt(short, long, parse(from_os_str))]
+    outfile: Option<PathBuf>,
+}
+
+#[derive(Deserialize, Debug)]
+struct PositionVector {
+    x1: f64,
+    y1: f64,
+    z1: f64,
+    x2: f64,
+    y2: f64,
+    z2: f64,
+    hours: f64,
+    planet: String,
+}
+
+#[derive(Serialize, Debug)]
+struct Values {
+    semimajor_axis: f64,
+    periapsis: f64,
+    apoapsis: f64,
+    eccentricity: f64,
+    angular_momentum: f64,
+    inclination: f64,
+    raan: f64,
+    argument_of_periapsis: f64,
+    true_anomaly: f64,
+}
 
 pub fn main() {
-    print_intro();
+    let opts = Opts::from_args();
+    println!("{:?}", opts);
 
-    /*
-    let (planet, x1, y1, z1, x2, y2, z2, hours) = query_values();
-    let planet: String = planet;
-    let dt: f64 = hours * 3600.; // [s]
-    let r1 = Vector3::new(x1, y1, z1);
-    let r2 = Vector3::new(x2, y2, z2);
-    */
+    print_intro();
 
     let grav_param: HashMap<String, f64> = HashMap::from([
         (String::from("Sun"), 132712000000.),
@@ -46,10 +79,28 @@ pub fn main() {
         (String::from("Pluto"), 830.),
     ]);
 
+    let u = read_vectors_from_file(opts.infile).unwrap();
+    println!("{:#?}", u);
+
+    let planet: String = u.planet;
+    let dt: f64 = u.hours * 3600.; // [s]
+    let r1 = Vector3::new(u.x1, u.y1, u.z1);
+    let r2 = Vector3::new(u.x2, u.y2, u.z2);
+
+    /* If you want to input values one by one
+    let (planet, x1, y1, z1, x2, y2, z2, hours) = query_values();
+    let planet: String = planet;
+    let dt: f64 = hours * 3600.; // [s]
+    let r1 = Vector3::new(x1, y1, z1);
+    let r2 = Vector3::new(x2, y2, z2);
+    */
+
+    /* Running from editor or terminal, have to input within the code
     let planet: String = String::from("Mars");
     let dt: f64 = 500. * 3600.; // [s]
     let r1 = Vector3::new(4343.0, 3653., -6344.0);
     let r2 = Vector3::new(-1340.0, 6325., -7333.);
+    */
 
     #[allow(unused)]
     let (v1, v2) = lambert(r1, r2, Direction::Retrograde, dt, grav_param[&planet]);
@@ -100,19 +151,6 @@ pub fn main() {
         get_json(a, r_p, r_a, elements).expect("Unable to produce JSON files");
     } else {
     }
-}
-
-#[derive(Serialize)]
-struct Values {
-    semimajor_axis: f64,
-    periapsis: f64,
-    apoapsis: f64,
-    eccentricity: f64,
-    angular_momentum: f64,
-    inclination: f64,
-    raan: f64,
-    argument_of_periapsis: f64,
-    true_anomaly: f64,
 }
 
 #[allow(unused)]
@@ -208,4 +246,16 @@ fn query_values() -> (String, f64, f64, f64, f64, f64, f64, f64) {
     let hours: f64 = hours.trim().parse().expect("Enter a floating point number");
 
     (planet, x1, y1, z1, x2, y2, z2, hours)
+}
+
+fn read_vectors_from_file<P: AsRef<Path>>(path: P) -> Result<PositionVector, Box<dyn Error>> {
+    // Open the file in read-only mode with buffer.
+    let file = File::open(path)?;
+    let reader = BufReader::new(file);
+
+    // Read the JSON contents of the file as an instance of `User`.
+    let u = serde_json::from_reader(reader)?;
+
+    // Return the `User`.
+    Ok(u)
 }

@@ -1,6 +1,9 @@
+// nalgebra - helpful for vector math
 use nalgebra::{Vector3, Vector6};
+// serde - helpful for JSON reading and writing
 use serde::Deserialize;
 use serde::Serialize;
+// standard library - file management, helpful io functions, etc.
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
@@ -8,8 +11,10 @@ use std::fs::File;
 use std::io::{self, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::exit;
+// structOpt - command-line parsing
 use structopt::StructOpt;
 
+/* Mod [file] allows rust-analyzer to recognize them */
 mod elements;
 mod julian_date;
 mod lagrange_coeffs;
@@ -20,20 +25,27 @@ mod plot;
 mod stumpff;
 mod vectors;
 
+// functions in other files that are used in main
 use crate::elements::get_elements;
 use crate::lambert_soln::{Direction, lambert};
-#[allow(unused)]
-use crate::plot::plot_orbit;
 
+#[allow(unused)]
+use crate::plot::plot_orbit; // for plotting, might use Python instead
+
+// structOpt - commandline parsing struct
+// infile - input file that will be read by serde-json
 #[derive(Debug, StructOpt)]
 struct Opts {
     #[structopt(parse(from_os_str))]
     infile: PathBuf,
 
+    // DEAD CODE FOR NOW ==> TODO!
     #[structopt(short, long, parse(from_os_str))]
     outfile: Option<PathBuf>,
 }
 
+// the current implementation for an input data structure
+// will likely change it once I figure out how to make it intuitive to use
 #[derive(Deserialize, Debug)]
 struct PositionVector {
     x1: f64,
@@ -46,8 +58,9 @@ struct PositionVector {
     planet: String,
 }
 
+// a struct to neatly package the resulting data and export JSON later on
 #[derive(Serialize, Debug)]
-struct Values {
+struct OrbitalElements {
     semimajor_axis: f64,
     periapsis: f64,
     apoapsis: f64,
@@ -60,11 +73,15 @@ struct Values {
 }
 
 pub fn main() {
+    // read command line parse
     let opts = Opts::from_args();
     println!("{:?}", opts);
 
+    // title + banner
     print_intro();
 
+    // dictionary/hashmap storing key-value pairs of
+    // central bodies and their gravitational parameter values
     let grav_param: HashMap<String, f64> = HashMap::from([
         (String::from("Sun"), 132712000000.),
         (String::from("Mercury"), 22030.),
@@ -79,15 +96,17 @@ pub fn main() {
         (String::from("Pluto"), 830.),
     ]);
 
+    // read the input JSON file
     let u = read_vectors_from_file(opts.infile).unwrap();
     println!("{:#?}", u);
 
+    /* Input values using a JSON file */
     let planet: String = u.planet;
     let dt: f64 = u.hours * 3600.; // [s]
     let r1 = Vector3::new(u.x1, u.y1, u.z1);
     let r2 = Vector3::new(u.x2, u.y2, u.z2);
 
-    /* If you want to input values one by one
+    /* Input values one by one using the terminal
     let (planet, x1, y1, z1, x2, y2, z2, hours) = query_values();
     let planet: String = planet;
     let dt: f64 = hours * 3600.; // [s]
@@ -95,17 +114,20 @@ pub fn main() {
     let r2 = Vector3::new(x2, y2, z2);
     */
 
-    /* Running from editor or terminal, have to input within the code
+    /* Input values within the code/IDE
     let planet: String = String::from("Mars");
     let dt: f64 = 500. * 3600.; // [s]
     let r1 = Vector3::new(4343.0, 3653., -6344.0);
     let r2 = Vector3::new(-1340.0, 6325., -7333.);
     */
 
+    // Call lambert function run solver and obtain v1 and v2
     #[allow(unused)]
     let (v1, v2) = lambert(r1, r2, Direction::Retrograde, dt, grav_param[&planet]);
+    // Using r1 & v1 OR r2 & v2, obtain a set of orbital elements
     let (a, elements, t_1, r_p, r_a) = get_elements(r1, v1, grav_param[&planet]);
 
+    // Not necessary but its cleaner
     let h = elements.x;
     let i = elements.y;
     let raan = elements.z;
@@ -134,6 +156,7 @@ pub fn main() {
         t_1 / 3600.
     );
 
+    /* Asking if use wants to save the elements/output to a JSON file */
     print!("EXTRACT TO ELEMENTS TO JSON? (Y/N): ");
     io::stdout().flush().expect("Failed to flush stdout.");
     let mut choice = String::new();
@@ -153,9 +176,10 @@ pub fn main() {
     }
 }
 
+// Function responsible for exporting output to a JSON file
 #[allow(unused)]
 fn get_json(a: f64, r_p: f64, r_a: f64, elements: Vector6<f64>) -> std::io::Result<()> {
-    let values = Values {
+    let values = OrbitalElements {
         semimajor_axis: a,
         periapsis: r_p,
         apoapsis: r_a,
@@ -178,12 +202,14 @@ fn get_json(a: f64, r_p: f64, r_a: f64, elements: Vector6<f64>) -> std::io::Resu
     Ok(())
 }
 
+// Title + banner
 fn print_intro() {
     println!("*************************************************");
     println!("                  Lambert Solver                 ");
     println!("*************************************************");
 }
 
+// Function asking user to input values in the terminal
 #[allow(unused)]
 fn query_values() -> (String, f64, f64, f64, f64, f64, f64, f64) {
     println!(
@@ -248,6 +274,7 @@ fn query_values() -> (String, f64, f64, f64, f64, f64, f64, f64) {
     (planet, x1, y1, z1, x2, y2, z2, hours)
 }
 
+// Function to read input JSON using serde and std lib
 fn read_vectors_from_file<P: AsRef<Path>>(path: P) -> Result<PositionVector, Box<dyn Error>> {
     // Open the file in read-only mode with buffer.
     let file = File::open(path)?;

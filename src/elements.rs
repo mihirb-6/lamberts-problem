@@ -93,6 +93,8 @@ pub fn get_elements(
     // Time since periapsis
     let t_1 = (mag_h.powi(3) / mu.powi(2)) * 1. / (1. - mag_e.powi(2)).powf(1.5) * me1;
 
+    
+    // Return a tuple of a vector containing elements + some extra info if necessary
     (
         a,
         Vector6::new(mag_h, i, raan, mag_e, w, theta),

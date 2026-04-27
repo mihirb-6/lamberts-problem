@@ -1,3 +1,4 @@
+/* stumpff functions that are used throughout lambert's problem */
 pub fn stumpff_c(x: f64) -> f64 {
     match x {
         x if x == 0. => 0.5,
@@ -8,6 +9,7 @@ pub fn stumpff_c(x: f64) -> f64 {
     }
 }
 
+// TODO! -> HYPERBOLIC ORBITS BREAK STUMPFF S (X -> INF)!!!!!!!!!!!! <- RAISE ERROR
 pub fn stumpff_s(x: f64) -> f64 {
     match x {
         x if x == 0. => 1. / 6.,
@@ -19,7 +21,7 @@ pub fn stumpff_s(x: f64) -> f64 {
 }
 
 // -------------------------------
-//             TESTS
+//             TESTS by claude so double check
 // -------------------------------
 
 #[cfg(test)]

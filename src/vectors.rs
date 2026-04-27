@@ -1,3 +1,7 @@
+/*
+ * Manual vector magntide and dot and cross products
+ * but nalgebra has 'easy to work with' vectors, so this file is useless
+ */
 #[allow(unused)]
 pub fn cross_product(a: &[f64; 3], b: &[f64; 3]) -> [f64; 3] {
     [
@@ -18,7 +22,7 @@ pub fn magnitude(a: &[f64; 3]) -> f64 {
 }
 
 // -------------------------------
-//             TESTS
+//             TESTS by claude so double check
 // -------------------------------
 
 #[cfg(test)]

@@ -9,6 +9,9 @@ pub enum Direction {
     Retrograde,
 }
 
+/* Bringing the project altogether, combining multiple functions
+ * to generate v1 and v2 from r1, r2, dt, and mu
+ */
 pub fn lambert(
     r1_vector: Vector3<f64>,
     r2_vector: Vector3<f64>,
@@ -69,12 +72,20 @@ pub fn lambert(
     let lambert_a = dtheta.sin() * ((r1 * r2) / (1. - dtheta.cos())).sqrt();
     //println!("A = {:.2}", lambert_a);
 
-    let z_initial = 0.; //MU.sqrt() * dt / lambert_a;
+    // Provide an inital estimate for z
+    // can also use a plot of f and f prime (lambert_eqns.rs) to estimate
+    let z_initial = 0.; //MU.sqrt() * dt / lambert_a; <- provided by curtis, might implement
     //println!("z0 = {}", z_initial);
 
+    // Set max times to iterate newton
     let max_iterations = 100;
+
+    // Set a tolerance
+    // i.e how close should z_n and z_n+1 be before halting iteration
+    // and determining z_n+1 as a root
     let tolerance = 1e-9;
 
+    // Newton's method to find a root iteratively (see newton.rs)
     let z_root = newton(
         r1,
         r2,
@@ -87,7 +98,7 @@ pub fn lambert(
     )
     .unwrap_or_else(|e| panic!("{}", e));
 
-    // Calculate lagrange coefficients
+    // Calculate lagrange coefficients (see langrange_coeffs.rs)
     let f = lagrange_f(r1, r2, lambert_a, z_root);
     #[allow(unused)]
     let fdot = lagrange_fdot(r1, r2, lambert_a, z_root, mu);
@@ -102,8 +113,8 @@ pub fn lambert(
     );
     */
 
-    let r1v = Vector3::from(r1_vector);
-    let r2v = Vector3::from(r2_vector);
+    let r1v: Vector3<f64> = Vector3::from(r1_vector);
+    let r2v: Vector3<f64> = Vector3::from(r2_vector);
 
     // Compute v1 and v2
     let v1 = 1. / g * (r2v - f * r1v);

@@ -41,6 +41,7 @@ struct Opts {
 
     // DEAD CODE FOR NOW ==> TODO!
     #[structopt(short, long, parse(from_os_str))]
+    #[allow(unused)]
     outfile: Option<PathBuf>,
 }
 
@@ -196,7 +197,7 @@ fn get_json(a: f64, r_p: f64, r_a: f64, elements: Vector6<f64>) -> std::io::Resu
         Err(_) => String::from("Unable to load data"),
     };
 
-    println!("Wrote to json: {}", j);
+    println!("Successfully wrote to JSON.");
 
     fs::write("orbital_elements.json", j)?;
     Ok(())

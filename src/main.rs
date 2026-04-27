@@ -75,7 +75,7 @@ struct OrbitalElements {
 pub fn main() {
     // read command line parse
     let opts = Opts::from_args();
-    println!("{:?}", opts);
+    //println!("{:?}", opts);
 
     // title + banner
     print_intro();
@@ -98,7 +98,7 @@ pub fn main() {
 
     // read the input JSON file
     let u = read_vectors_from_file(opts.infile).unwrap();
-    println!("{:#?}", u);
+    //println!("{:#?}", u);
 
     /* Input values using a JSON file */
     let planet: String = u.planet;

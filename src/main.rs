@@ -55,8 +55,8 @@ struct PositionVector {
     x2: f64,
     y2: f64,
     z2: f64,
-    hours: f64,
-    planet: String,
+    time: f64,    // [s]
+    body: String, // see grav_param for possible central bodies
 }
 
 // a struct to neatly package the resulting data and export JSON later on
@@ -99,34 +99,19 @@ pub fn main() {
 
     // read the input JSON file
     let u = read_vectors_from_file(opts.infile).unwrap();
-    //println!("{:#?}", u);
+    println!("{:#?}", u);
 
     /* Input values using a JSON file */
-    let planet: String = u.planet;
-    let dt: f64 = u.hours * 3600.; // [s]
+    let body: String = u.body;
+    let dt: f64 = u.time * 3600.; // [s]
     let r1 = Vector3::new(u.x1, u.y1, u.z1);
     let r2 = Vector3::new(u.x2, u.y2, u.z2);
 
-    /* Input values one by one using the terminal
-    let (planet, x1, y1, z1, x2, y2, z2, hours) = query_values();
-    let planet: String = planet;
-    let dt: f64 = hours * 3600.; // [s]
-    let r1 = Vector3::new(x1, y1, z1);
-    let r2 = Vector3::new(x2, y2, z2);
-    */
-
-    /* Input values within the code/IDE
-    let planet: String = String::from("Mars");
-    let dt: f64 = 500. * 3600.; // [s]
-    let r1 = Vector3::new(4343.0, 3653., -6344.0);
-    let r2 = Vector3::new(-1340.0, 6325., -7333.);
-    */
-
     // Call lambert function run solver and obtain v1 and v2
     #[allow(unused)]
-    let (v1, v2) = lambert(r1, r2, Direction::Retrograde, dt, grav_param[&planet]);
+    let (v1, v2) = lambert(r1, r2, Direction::Retrograde, dt, grav_param[&body]);
     // Using r1 & v1 OR r2 & v2, obtain a set of orbital elements
-    let (a, elements, t_1, r_p, r_a) = get_elements(r1, v1, grav_param[&planet]);
+    let (a, elements, t_1, r_p, r_a) = get_elements(r1, v1, grav_param[&body]);
 
     // Not necessary but its cleaner
     let h = elements.x;

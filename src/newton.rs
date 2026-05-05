@@ -27,16 +27,17 @@ pub fn newton(
 
         // if z_n+1 - z_n is within our defined tolerance
         if (x_next - x_i).abs() < tol {
-            println!("-> Root of z: {:.5}", x_next);
+            println!("FOUND ROOT OF z: {:.5}", x_next);
             println!("---------CONVERGED AFTER {} ITERATIONS---------", iteration);
             // return z_n+1
             return Ok(x_next);
         }
 
-        println!(
-            "Itr {}: z = {:.7}  |  f(z) = {:.2}  |   f'(z) = {:.2}",
-            iteration, x_i, f_x, fprime
-        );
+        if (x_next) < 0. {
+            panic!("******HYPERBOLIC ORBIT, CHOOSE DIFFERENT VECTORS/TIMEFRAME/BODY******");
+        }
+
+        println!("Itr {}: z = {:.7}", iteration, x_i);
 
         // if z_n+1 - z_n is not within specified tolerance
         // z_n+1 becomes z_n and the process repeats until specified # of max iterations

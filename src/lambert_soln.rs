@@ -18,6 +18,8 @@ pub fn lambert(
     direction: Direction,
     dt: f64,
     mu: f64,
+    z_init: f64,
+    max_itrs: u32,
 ) -> (Vector3<f64>, Vector3<f64>) {
     let r1 = r1_vector.magnitude();
     let r2 = r2_vector.magnitude();
@@ -74,16 +76,16 @@ pub fn lambert(
 
     // Provide an inital estimate for z
     // can also use a plot of f and f prime (lambert_eqns.rs) to estimate
-    let z_initial = 0.; //MU.sqrt() * dt / lambert_a; <- provided by curtis, might implement
+    let z_initial: f64 = z_init; //MU.sqrt() * dt / lambert_a; <- provided by curtis, might implement
     //println!("z0 = {}", z_initial);
 
     // Set max times to iterate newton
-    let max_iterations = 100;
+    let max_iterations: u32 = max_itrs;
 
     // Set a tolerance
     // i.e how close should z_n and z_n+1 be before halting iteration
     // and determining z_n+1 as a root
-    let tolerance = 1e-9;
+    let tolerance: f64 = 1e-9;
 
     // Newton's method to find a root iteratively (see newton.rs)
     let z_root = newton(

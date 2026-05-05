@@ -12,7 +12,9 @@ use std::io::{self, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::exit;
 // structOpt - command-line parsing
-use structopt::StructOpt;
+//use structopt::StructOpt;
+// clap - command-line parsing
+use clap::Parser;
 
 /* Mod [file] allows rust-analyzer to recognize them */
 mod elements;
@@ -29,21 +31,34 @@ mod vectors;
 use crate::elements::get_elements;
 use crate::lambert_soln::{Direction, lambert};
 
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    #[arg(short, long)]
+    direction: String, // prograde/retrograde
+
+    #[arg(short, long, default_value_t = 0.)]
+    z_init: f64, // initial guess for z, default is set to 0
+
+    #[arg(short, long, default_value_t = 100)]
+    max_itrs: u32, // maximum iterations to run newton's method
+
+    #[arg(short, long)]
+    infile: PathBuf,
+}
+
 #[allow(unused)]
 use crate::plot::plot_orbit; // for plotting, might use Python instead
 
 // structOpt - commandline parsing struct
 // infile - input file that will be read by serde-json
+/*
 #[derive(Debug, StructOpt)]
 struct Opts {
     #[structopt(parse(from_os_str))]
     infile: PathBuf,
-
-    // DEAD CODE FOR NOW ==> TODO!
-    #[structopt(short, long, parse(from_os_str))]
-    #[allow(unused)]
-    outfile: Option<PathBuf>,
 }
+*/
 
 // the current implementation for an input data structure
 // will likely change it once I figure out how to make it intuitive to use
@@ -57,7 +72,6 @@ struct PositionVector {
     z2: f64,
     time: f64,    // [s]
     body: String, // see grav_param for possible central bodies
-    direction: String,
 }
 
 // a struct to neatly package the resulting data and export JSON later on
@@ -76,8 +90,11 @@ struct OrbitalElements {
 
 pub fn main() {
     // read command line parse
-    let opts = Opts::from_args();
+    //let opts = Opts::from_args();
     //println!("{:?}", opts);
+
+    // read command line parse
+    let args = Args::parse();
 
     // title + banner
     print_intro();
@@ -99,7 +116,7 @@ pub fn main() {
     ]);
 
     // read the input JSON file
-    let u = read_vectors_from_file(opts.infile).unwrap();
+    let u = read_vectors_from_file(args.infile).unwrap();
     //println!("{:#?}", u);
 
     /* Input values using a JSON file */
@@ -107,7 +124,7 @@ pub fn main() {
     let dt: f64 = u.time; // [s]
     let r1 = Vector3::new(u.x1, u.y1, u.z1);
     let r2 = Vector3::new(u.x2, u.y2, u.z2);
-    let direction = if u.direction == "Retrograde" {
+    let direction = if args.direction == "Retrograde" {
         Direction::Retrograde
     } else {
         Direction::Prograde
@@ -115,7 +132,15 @@ pub fn main() {
 
     // Call lambert function run solver and obtain v1 and v2
     #[allow(unused)]
-    let (v1, v2) = lambert(r1, r2, direction, dt, grav_param[&body]);
+    let (v1, v2) = lambert(
+        r1,
+        r2,
+        direction,
+        dt,
+        grav_param[&body],
+        args.z_init,
+        args.max_itrs,
+    );
     // Using r1 & v1 OR r2 & v2, obtain a set of orbital elements
     let (a, elements, t_1, r_p, r_a) = get_elements(r1, v1, grav_param[&body]);
 
@@ -207,7 +232,20 @@ fn print_intro() {
     println!("*************************************************");
 }
 
-// Function asking user to input values in the terminal
+// Function to read input JSON using serde and std lib
+fn read_vectors_from_file<P: AsRef<Path>>(path: P) -> Result<PositionVector, Box<dyn Error>> {
+    // Open the file in read-only mode with buffer.
+    let file = File::open(path)?;
+    let reader = BufReader::new(file);
+
+    // Read the JSON contents of the file as an instance of `User`.
+    let u = serde_json::from_reader(reader)?;
+
+    // Return the `User`.
+    Ok(u)
+}
+
+/*Function asking user to input values in the terminal
 #[allow(unused)]
 fn query_values() -> (String, f64, f64, f64, f64, f64, f64, f64) {
     println!(
@@ -271,16 +309,4 @@ fn query_values() -> (String, f64, f64, f64, f64, f64, f64, f64) {
 
     (planet, x1, y1, z1, x2, y2, z2, hours)
 }
-
-// Function to read input JSON using serde and std lib
-fn read_vectors_from_file<P: AsRef<Path>>(path: P) -> Result<PositionVector, Box<dyn Error>> {
-    // Open the file in read-only mode with buffer.
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-
-    // Read the JSON contents of the file as an instance of `User`.
-    let u = serde_json::from_reader(reader)?;
-
-    // Return the `User`.
-    Ok(u)
-}
+*/

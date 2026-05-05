@@ -8,11 +8,8 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 use std::fs::File;
-use std::io::{self, BufReader, Write};
+use std::io::BufReader;
 use std::path::{Path, PathBuf};
-use std::process::exit;
-// structOpt - command-line parsing
-//use structopt::StructOpt;
 // clap - command-line parsing
 use clap::Parser;
 
@@ -45,20 +42,13 @@ struct Args {
 
     #[arg(short, long)]
     infile: PathBuf,
+
+    #[arg(short, long, default_value_t = 'N')]
+    json: char,
 }
 
 #[allow(unused)]
 use crate::plot::plot_orbit; // for plotting, might use Python instead
-
-// structOpt - commandline parsing struct
-// infile - input file that will be read by serde-json
-/*
-#[derive(Debug, StructOpt)]
-struct Opts {
-    #[structopt(parse(from_os_str))]
-    infile: PathBuf,
-}
-*/
 
 // the current implementation for an input data structure
 // will likely change it once I figure out how to make it intuitive to use
@@ -179,23 +169,10 @@ pub fn main() {
         t_1 / 3600.
     );
 
-    /* Asking if use wants to save the elements/output to a JSON file */
-    print!("EXTRACT TO ELEMENTS TO JSON? (Y/N): ");
-    io::stdout().flush().expect("Failed to flush stdout.");
-    let mut choice = String::new();
-    io::stdin()
-        .read_line(&mut choice)
-        .expect("Read line error.");
-    let choice: char = choice.trim().parse().expect("Unable to parse");
+    // JSON output handling
 
-    if !matches!(choice, 'Y' | 'N') {
-        println!("'Y' or 'N' only");
-        exit(000001);
-    }
-
-    if choice == 'Y' {
+    if args.json == 'Y' {
         get_json(a, r_p, r_a, elements).expect("Unable to produce JSON files");
-    } else {
     }
 }
 

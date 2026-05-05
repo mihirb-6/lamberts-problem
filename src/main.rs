@@ -100,7 +100,7 @@ pub fn main() {
 
     // read the input JSON file
     let u = read_vectors_from_file(opts.infile).unwrap();
-    println!("{:#?}", u);
+    //println!("{:#?}", u);
 
     /* Input values using a JSON file */
     let body: String = u.body;
@@ -183,10 +183,10 @@ fn get_json(a: f64, r_p: f64, r_a: f64, elements: Vector6<f64>) -> std::io::Resu
         apoapsis: r_a,
         eccentricity: elements.w,
         angular_momentum: elements.x,
-        inclination: elements.y,
-        raan: elements.z,
-        argument_of_periapsis: elements.a,
-        true_anomaly: elements.b,
+        inclination: elements.y.to_degrees(),
+        raan: elements.z.to_degrees(),
+        argument_of_periapsis: elements.a.to_degrees(),
+        true_anomaly: elements.b.to_degrees(),
     };
 
     let j = match serde_json::to_string(&values) {

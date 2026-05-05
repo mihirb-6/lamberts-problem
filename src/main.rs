@@ -31,18 +31,23 @@ use crate::lambert_soln::{Direction, lambert};
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    #[arg(short, long)]
-    direction: String, // prograde/retrograde
+    // prograde/retrograde option, default set to Prograde
+    #[arg(short, long, default_value_t = String::from("Prograde"))]
+    direction: String,
 
+    // initial guess for z
     #[arg(short, long, default_value_t = 0.)]
-    z_init: f64, // initial guess for z, default is set to 0
+    z_init: f64,
 
+    // maximum iterations to run newton's method
     #[arg(short, long, default_value_t = 100)]
-    max_itrs: u32, // maximum iterations to run newton's method
+    max_itrs: u32,
 
+    // input file containing vectors, time, and central body
     #[arg(short, long)]
     infile: PathBuf,
 
+    // option to save orbital elements to JSON 'N'/'Y'
     #[arg(short, long, default_value_t = 'N')]
     json: char,
 }

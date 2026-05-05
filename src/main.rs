@@ -57,6 +57,7 @@ struct PositionVector {
     z2: f64,
     time: f64,    // [s]
     body: String, // see grav_param for possible central bodies
+    direction: String,
 }
 
 // a struct to neatly package the resulting data and export JSON later on
@@ -103,13 +104,18 @@ pub fn main() {
 
     /* Input values using a JSON file */
     let body: String = u.body;
-    let dt: f64 = u.time * 3600.; // [s]
+    let dt: f64 = u.time; // [s]
     let r1 = Vector3::new(u.x1, u.y1, u.z1);
     let r2 = Vector3::new(u.x2, u.y2, u.z2);
+    let direction = if u.direction == "Retrograde" {
+        Direction::Retrograde
+    } else {
+        Direction::Prograde
+    };
 
     // Call lambert function run solver and obtain v1 and v2
     #[allow(unused)]
-    let (v1, v2) = lambert(r1, r2, Direction::Retrograde, dt, grav_param[&body]);
+    let (v1, v2) = lambert(r1, r2, direction, dt, grav_param[&body]);
     // Using r1 & v1 OR r2 & v2, obtain a set of orbital elements
     let (a, elements, t_1, r_p, r_a) = get_elements(r1, v1, grav_param[&body]);
 
@@ -124,17 +130,23 @@ pub fn main() {
     //plot_orbit(e, h, i, raan, w, grav_param[planet], a);
 
     // Orbital Elements Print Statement
-    println!("--------------ORBITAL ELEMENTS----------------");
-    println!("SEMIMAJOR AXIS (a): = {:.4} [km]", a);
-    println!("PERIAPSIS (r_p): = {:.4} [km]", r_p);
-    println!("APOAPSIS (r_a): = {:.4} [km]", r_a);
-    println!("ECCENTRICITY (e): = {:.4}", e);
-    println!("SPECIFIC ANGULAR MOMENTUM (h): = {:.2} [km^2 s^-1]", h);
-    println!("INCLINATION (i): = {:.2}°", i.to_degrees());
-    println!("RA OF ASCENDING NODE (Ω): = {:.2}°", raan.to_degrees());
-    println!("ARGUMENT OF PERIAPSIS (ω) = {:.2}°", w.to_degrees());
-    println!("TRUE ANOMALY (θ) = {:.2}°", theta.to_degrees());
-    println!("----------------------------------------------");
+    println!("--------------ORBITAL ELEMENTS-----------------");
+    println!("ECCENTRICITY (e):                {:.4}", e);
+    println!("SPECIFIC ANGULAR MOMENTUM (h):   {:.2} [km^2 s^-1]", h);
+    println!("SEMIMAJOR AXIS (a):              {:.4} [km]", a);
+    println!("PERIAPSIS (r_p):                 {:.4} [km]", r_p);
+    println!("APOAPSIS (r_a):                  {:.4} [km]", r_a);
+    println!("INCLINATION (i):                 {:.2} [°]", i.to_degrees());
+    println!(
+        "RA OF ASCENDING NODE (Ω):        {:.2} [°]",
+        raan.to_degrees()
+    );
+    println!("ARGUMENT OF PERIAPSIS (ω)        {:.2} [°]", w.to_degrees());
+    println!(
+        "TRUE ANOMALY (θ)                 {:.2} [°]",
+        theta.to_degrees()
+    );
+    println!("-----------------------------------------------");
     println!(
         "Perigee encounter in {:.1} s = {:.2} min = {:.2} hr(s)",
         t_1,

@@ -32,17 +32,24 @@ cargo build # executable can be found in ~/target/debug/
 
 ---
 
-## Usage
+## Example Command-line Interface Usage
+(zsh since I'm working from a mac, for Windows it should be similar)
+```zsh
+# To access the full list of flags and inputs you can use:
+./target/release/lamberts-problem --help
 
-```bash
+# The most basic execution with only an input JSON file with two position vectors and time of flight
 ./target/release/lamberts-problem -i [input_filename].json
+
+# A more customized way to run the program (-j Y saves orbital elements to a JSON file)
+./target/release/lamberts-problem -i [input_filename].json -b Mars -d Retrograde -z 1.5 -j Y
 ```
 
 ---
 
 ## Technical Approach
 
-The implementation follows a classical formulation of Lambert’s problem, solving for transfer geometry and iteratively converging on a valid trajectory.
+The implementation follows a classical formulation of Lambert’s problem, solving for transfer geometry and iteratively converging on a valid trajectory using Newton's method.
 
 Key components include:
 
@@ -50,7 +57,6 @@ Key components include:
 * Handling edge cases (e.g., collinear vectors, 0°/360° transfer angles)
 * Root-finding for convergence on orbital parameters
 
-The design prioritizes transparency over abstraction, making the algorithm accessible for further experimentation and research.
 
 ---
 
@@ -67,16 +73,10 @@ It reflects a broader commitment to developing tools for scientific computing an
 
 ## Future Work
 
-* Multi-revolution Lambert solutions
+* Improved error handling
 * Improved numerical stability and convergence methods
 * Integration with ephemeris data
-* Visualization of transfer orbits
-
----
-
-## Contributing
-
-Contributions are welcome. Please open an issue or submit a pull request with clear documentation and test cases.
+* Visualization of standard + transfer orbits
 
 ---
 
@@ -88,8 +88,8 @@ MIT License
 
 ## Acknowledgments
 
-Inspired by classical astrodynamics literature and modern implementations of Lambert solvers used in trajectory design and mission planning.
-
+Inspired (and largely an implementation of) by Howard D. Curtis' Orbital Mechanics textbook and his chapter on Lambert's problem
 ---
 
-[1]: https://mcaneff.github.io/pdfs/Orbital%20Mechanics%20Lamberts%20Problem.pdf?utm_source=chatgpt.com "ORBITAL DYNAMICS"
+[1]: Curtis, H.D. (2013) Orbital Mechanics for Engineering Students. Butterworth-Heinemann, Oxford.
+https://doi.org/10.1016/B978-0-08-097747-8.00006-2

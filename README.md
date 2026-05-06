@@ -6,7 +6,7 @@ A lightweight and focused implementation of **Lambert’s Problem** in Rust, des
 
 ## Overview
 
-Lambert’s Problem is a cornerstone of astrodynamics: determining the orbit connecting two points in space within a specified time interval ([mcaneff | My Portfolio][1]). This repository provides a clean and extensible implementation, emphasizing numerical clarity and performance.
+Lambert’s Problem is a cornerstone of astrodynamics: determining the orbit connecting two points in space within a specified time interval. This repository provides a foundational implementation, emphasizing ease of use via terminal.
 
 This project reflects a foundational step toward trajectory design, orbit determination, and mission analysis.
 
@@ -18,7 +18,6 @@ This project reflects a foundational step toward trajectory design, orbit determ
 * Support for **prograde and retrograde trajectories**
 * Vector-based implementation using modern Rust practices
 * Clear separation of geometric and numerical components
-* Designed for extensibility (multi-rev solutions, alternative solvers)
 
 ---
 
@@ -26,29 +25,18 @@ This project reflects a foundational step toward trajectory design, orbit determ
 
 ```bash
 git clone https://github.com/mihirb-6/lamberts-problem.git
-cd lamberts-problem
-cargo build
+cd lamberts-problem # navigate to where you downloaded the code
+cargo build # executable can be found in ~/target/debug/
+# can also do 'cargo build --release' for a more optimized version (~/target/release/lamberts-problem)
 ```
 
 ---
 
 ## Usage
 
-```rust
-let (v1, v2) = lambert(r1_vector, r2_vector, direction, dt);
+```bash
+./target/release/lamberts-problem -i [input_filename].json
 ```
-
-### Inputs
-
-* `r1_vector`: Initial position vector
-* `r2_vector`: Final position vector
-* `direction`: Prograde or retrograde transfer
-* `dt`: Time of flight
-
-### Outputs
-
-* `v1`: Initial velocity vector
-* `v2`: Final velocity vector
 
 ---
 

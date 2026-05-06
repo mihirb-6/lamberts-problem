@@ -91,5 +91,4 @@ MIT License
 Inspired by (and largely an implementation of) Howard D. Curtis' Orbital Mechanics textbook and his chapter on Lambert's problem
 ---
 
-[1]: Curtis, H.D. (2013) Orbital Mechanics for Engineering Students. Butterworth-Heinemann, Oxford.
-https://doi.org/10.1016/B978-0-08-097747-8.00006-2
+[1]: Curtis, H.D. (2013) Orbital Mechanics for Engineering Students

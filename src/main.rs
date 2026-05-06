@@ -50,6 +50,11 @@ struct Args {
     // option to save orbital elements to JSON 'N'/'Y'
     #[arg(short, long, default_value_t = 'N')]
     json: char,
+
+    // option to select central body
+    // see grav_param for possible central bodies
+    #[arg(short, long, default_value_t = String::from("Earth"))]
+    body: String,
 }
 
 #[allow(unused)]
@@ -65,8 +70,7 @@ struct PositionVector {
     x2: f64,
     y2: f64,
     z2: f64,
-    time: f64,    // [s]
-    body: String, // see grav_param for possible central bodies
+    time: f64, // [s]
 }
 
 // a struct to neatly package the resulting data and export JSON later on
@@ -115,7 +119,7 @@ pub fn main() {
     //println!("{:#?}", u);
 
     /* Input values using a JSON file */
-    let body: String = u.body;
+    let body: String = args.body;
     let dt: f64 = u.time; // [s]
     let r1 = Vector3::new(u.x1, u.y1, u.z1);
     let r2 = Vector3::new(u.x2, u.y2, u.z2);

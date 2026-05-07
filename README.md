@@ -33,12 +33,13 @@ cargo build # executable can be found in ~/target/debug/
 ---
 
 ## Example Command-line Interface Usage
-(zsh since I'm working from a mac, for Windows it should be similar)
 ```zsh
 # To access the full list of flags and inputs you can use:
 ./target/release/lamberts-problem --help
 
-# The most basic execution with only an input JSON file with two position vectors and time of flight
+# The most basic execution with only an input JSON file
+# with two position vectors and time of flight
+# (see example file)
 ./target/release/lamberts-problem -i [input_filename].json
 
 # A more customized way to run the program (-j Y saves orbital elements to a JSON file)

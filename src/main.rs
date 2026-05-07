@@ -20,7 +20,6 @@ mod lagrange_coeffs;
 mod lambert_eqns;
 mod lambert_soln;
 mod newton;
-mod plot;
 mod stumpff;
 mod vectors;
 
@@ -56,9 +55,6 @@ struct Args {
     #[arg(short, long, default_value_t = String::from("Earth"))]
     body: String,
 }
-
-#[allow(unused)]
-use crate::plot::plot_orbit; // for plotting, might use Python instead
 
 // the current implementation for an input data structure
 // will likely change it once I figure out how to make it intuitive to use
@@ -151,8 +147,6 @@ pub fn main() {
     let w = elements.a;
     let theta = elements.b;
 
-    //plot_orbit(e, h, i, raan, w, grav_param[planet], a);
-
     // Orbital Elements Print Statement
     println!("--------------ORBITAL ELEMENTS-----------------");
     println!("ECCENTRICITY (e):                {:.4}", e);
@@ -179,14 +173,12 @@ pub fn main() {
     );
 
     // JSON output handling
-
     if args.json == 'Y' {
         get_json(a, r_p, r_a, elements).expect("Unable to produce JSON files");
     }
 }
 
 // Function responsible for exporting output to a JSON file
-#[allow(unused)]
 fn get_json(a: f64, r_p: f64, r_a: f64, elements: Vector6<f64>) -> std::io::Result<()> {
     let values = OrbitalElements {
         semimajor_axis: a,
@@ -230,69 +222,3 @@ fn read_vectors_from_file<P: AsRef<Path>>(path: P) -> Result<PositionVector, Box
     // Return the `User`.
     Ok(u)
 }
-
-/*Function asking user to input values in the terminal
-#[allow(unused)]
-fn query_values() -> (String, f64, f64, f64, f64, f64, f64, f64) {
-    println!(
-        "Choose main body -> Sun/Mercury/Venus/Earth/Moon/Mars/Jupiter/Saturn/Uranus/Neptune/Pluto"
-    );
-    io::stdout().flush().expect("Failed to flush stdout.");
-    let mut planet = String::new();
-    io::stdin()
-        .read_line(&mut planet)
-        .expect("Read line error.");
-    let planet: String = planet
-        .trim()
-        .parse()
-        .expect("Enter one of the objects listed in the prompt.");
-
-    println!("Position Vector R1 in km...");
-    print!("Input x1: ");
-    io::stdout().flush().expect("Failed to flush stdout.");
-    let mut x1 = String::new();
-    io::stdin().read_line(&mut x1).expect("Read line error.");
-    let x1: f64 = x1.trim().parse().expect("Enter a floating point number");
-
-    print!("Input y1: ");
-    io::stdout().flush().expect("Failed to flush stdout.");
-    let mut y1 = String::new();
-    io::stdin().read_line(&mut y1).expect("Read line error.");
-    let y1: f64 = y1.trim().parse().expect("Enter a floating point number");
-
-    print!("Input z1: ");
-    io::stdout().flush().expect("Failed to flush stdout.");
-    let mut z1 = String::new();
-    io::stdin().read_line(&mut z1).expect("Read line error.");
-    let z1: f64 = z1.trim().parse().expect("Enter a floating point number");
-
-    println!("Position Vector R2 in km...");
-    print!("Input x2: ");
-    io::stdout().flush().expect("Failed to flush stdout.");
-    let mut x2 = String::new();
-    io::stdin().read_line(&mut x2).expect("Read line error.");
-    let x2: f64 = x2.trim().parse().expect("Enter a floating point number");
-
-    print!("Input y2: ");
-    io::stdout().flush().expect("Failed to flush stdout.");
-    let mut y2 = String::new();
-    io::stdin().read_line(&mut y2).expect("Read line error.");
-    let y2: f64 = y2.trim().parse().expect("Enter a floating point number");
-
-    print!("Input z2: ");
-    io::stdout().flush().expect("Failed to flush stdout.");
-    let mut z2 = String::new();
-    io::stdin().read_line(&mut z2).expect("Read line error.");
-    let z2: f64 = z2.trim().parse().expect("Enter a floating point number");
-
-    println!("Time between R1 and R2 (dt) in hours...");
-
-    print!("Input dt: ");
-    io::stdout().flush().expect("Failed to flush stdout.");
-    let mut hours = String::new();
-    io::stdin().read_line(&mut hours).expect("Read line error.");
-    let hours: f64 = hours.trim().parse().expect("Enter a floating point number");
-
-    (planet, x1, y1, z1, x2, y2, z2, hours)
-}
-*/

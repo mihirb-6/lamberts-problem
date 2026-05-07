@@ -34,7 +34,10 @@ pub fn newton(
         }
 
         if (x_next) < 0. {
-            panic!("******HYPERBOLIC ORBIT, CHOOSE DIFFERENT VECTORS/TIMEFRAME/BODY******");
+            panic!(
+                "******HYPERBOLIC ORBIT******\n
+                ->CHOOSE DIFFERENT POSITION VECTORS/TIMEFRAME/CENTRAL BODY"
+            );
         }
 
         println!("Itr {}: z = {:.7}", iteration, x_i);

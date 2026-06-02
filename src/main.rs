@@ -1,5 +1,8 @@
 // nalgebra - helpful for vector math
 use nalgebra::{Vector3, Vector6};
+// for planetary ephemeris
+#[allow(unused)]
+use satkit::prelude::*;
 // serde - helpful for JSON reading and writing
 use serde::Deserialize;
 use serde::Serialize;
@@ -85,14 +88,9 @@ struct OrbitalElements {
 
 pub fn main() {
     // read command line parse
-    //let opts = Opts::from_args();
-    //println!("{:?}", opts);
-
-    // read command line parse
     let args = Args::parse();
 
     // title + banner
-    print_intro();
 
     // dictionary/hashmap storing key-value pairs of
     // central bodies and their gravitational parameter values
@@ -115,7 +113,7 @@ pub fn main() {
     //println!("{:#?}", u);
 
     /* Input values using a JSON file */
-    let body: String = args.body;
+    let central_body: String = args.body;
     let dt: f64 = u.time; // [s]
     let r1 = Vector3::new(u.x1, u.y1, u.z1);
     let r2 = Vector3::new(u.x2, u.y2, u.z2);
@@ -132,14 +130,14 @@ pub fn main() {
         r2,
         direction,
         dt,
-        grav_param[&body],
+        grav_param[&central_body],
         args.z_init,
         args.max_itrs,
     );
     // Using r1 & v1 OR r2 & v2, obtain a set of orbital elements
-    let (a, elements, t_1, r_p, r_a) = get_elements(r1, v1, grav_param[&body]);
+    let (a, elements, t_1, r_p, r_a) = get_elements(r1, v1, grav_param[&central_body]);
 
-    // Not necessary but its cleaner
+    // Not necessary to assign variables but its cleaner
     let h = elements.x;
     let i = elements.y;
     let raan = elements.z;
@@ -204,6 +202,7 @@ fn get_json(a: f64, r_p: f64, r_a: f64, elements: Vector6<f64>) -> std::io::Resu
 }
 
 // Title + banner
+#[allow(unused)]
 fn print_intro() {
     println!("*************************************************");
     println!("                  Lambert Solver                 ");

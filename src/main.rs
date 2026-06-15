@@ -1,5 +1,5 @@
 // nalgebra - helpful for vector math
-use nalgebra::{Vector3, Vector6};
+use nalgebra::Vector3;
 // for planetary ephemeris
 #[allow(unused)]
 use satkit::prelude::*;
@@ -27,7 +27,7 @@ mod stumpff;
 mod vectors;
 
 // functions in other files that are used in main
-use crate::elements::get_elements;
+use crate::elements::{Elements, get_elements};
 use crate::lambert_soln::{Direction, lambert};
 
 #[derive(Parser, Debug)]
@@ -117,77 +117,92 @@ pub fn main() {
     let dt: f64 = u.time; // [s]
     let r1 = Vector3::new(u.x1, u.y1, u.z1);
     let r2 = Vector3::new(u.x2, u.y2, u.z2);
+
     let direction = if args.direction == "Retrograde" {
         Direction::Retrograde
     } else {
         Direction::Prograde
     };
 
+    let mu = grav_param[&central_body];
     // Call lambert function run solver and obtain v1 and v2
     #[allow(unused)]
-    let (v1, v2) = lambert(
-        r1,
-        r2,
-        direction,
-        dt,
-        grav_param[&central_body],
-        args.z_init,
-        args.max_itrs,
-    );
+    let (v1, v2) = lambert(r1, r2, direction, dt, mu, args.z_init, args.max_itrs);
     // Using r1 & v1 OR r2 & v2, obtain a set of orbital elements
-    let (a, elements, t_1, r_p, r_a) = get_elements(r1, v1, grav_param[&central_body]);
-
-    // Not necessary to assign variables but its cleaner
-    let h = elements.x;
-    let i = elements.y;
-    let raan = elements.z;
-    let e = elements.w;
-    let w = elements.a;
-    let theta = elements.b;
+    let elements = get_elements(r1, v1, mu);
 
     // Orbital Elements Print Statement
     println!("--------------ORBITAL ELEMENTS-----------------");
-    println!("ECCENTRICITY (e):                {:.4}", e);
-    println!("SPECIFIC ANGULAR MOMENTUM (h):   {:.2} [km^2 s^-1]", h);
-    println!("SEMIMAJOR AXIS (a):              {:.4} [km]", a);
-    println!("PERIAPSIS (r_p):                 {:.4} [km]", r_p);
-    println!("APOAPSIS (r_a):                  {:.4} [km]", r_a);
-    println!("INCLINATION (i):                 {:.2} [°]", i.to_degrees());
+    println!(
+        "ECCENTRICITY (e):                {:.4}",
+        elements.eccentricity
+    );
+    println!(
+        "SPECIFIC ANGULAR MOMENTUM (h):   {:.2} [km^2 s^-1]",
+        elements.angular_momentum
+    );
+    println!(
+        "SEMIMAJOR AXIS (a):              {:.4} [km]",
+        elements.seminajor_axis(mu)
+    );
+    println!(
+        "PERIAPSIS (r_p):                 {:.4} [km]",
+        elements.periapsis(mu)
+    );
+    println!(
+        "APOAPSIS (r_a):                  {:.4} [km]",
+        elements.apoapsis(mu)
+    );
+    println!(
+        "INCLINATION (i):                 {:.2} [°]",
+        elements.inclination.to_degrees()
+    );
     println!(
         "RA OF ASCENDING NODE (Ω):        {:.2} [°]",
-        raan.to_degrees()
+        elements.raan.to_degrees()
     );
-    println!("ARGUMENT OF PERIAPSIS (ω)        {:.2} [°]", w.to_degrees());
+    println!(
+        "ARGUMENT OF PERIAPSIS (ω)        {:.2} [°]",
+        elements.argument_of_periapsis.to_degrees()
+    );
     println!(
         "TRUE ANOMALY (θ)                 {:.2} [°]",
-        theta.to_degrees()
+        elements.true_anomaly.to_degrees()
     );
     println!("-----------------------------------------------");
     println!(
         "Perigee encounter in {:.1} s = {:.2} min = {:.2} hr(s)",
-        t_1,
-        t_1 / 60.,
-        t_1 / 3600.
+        elements.time_since_perapsis(mu),
+        elements.time_since_perapsis(mu) / 60.,
+        elements.time_since_perapsis(mu) / 3600.
     );
 
     // JSON output handling
     if args.json == 'Y' {
-        get_json(a, r_p, r_a, elements).expect("Unable to produce JSON files");
+        get_json(
+            elements.angular_momentum,
+            elements.periapsis(mu),
+            elements.apoapsis(mu),
+            elements,
+            mu,
+        )
+        .expect("Unable to produce JSON files");
     }
 }
 
 // Function responsible for exporting output to a JSON file
-fn get_json(a: f64, r_p: f64, r_a: f64, elements: Vector6<f64>) -> std::io::Result<()> {
+#[allow(unused)]
+fn get_json(a: f64, r_p: f64, r_a: f64, elements: Elements, mu: f64) -> std::io::Result<()> {
     let values = OrbitalElements {
-        semimajor_axis: a,
-        periapsis: r_p,
-        apoapsis: r_a,
-        eccentricity: elements.w,
-        angular_momentum: elements.x,
-        inclination: elements.y.to_degrees(),
-        raan: elements.z.to_degrees(),
-        argument_of_periapsis: elements.a.to_degrees(),
-        true_anomaly: elements.b.to_degrees(),
+        semimajor_axis: elements.seminajor_axis(mu),
+        periapsis: elements.periapsis(mu),
+        apoapsis: elements.apoapsis(mu),
+        eccentricity: elements.eccentricity,
+        angular_momentum: elements.angular_momentum,
+        inclination: elements.inclination.to_degrees(),
+        raan: elements.raan.to_degrees(),
+        argument_of_periapsis: elements.argument_of_periapsis.to_degrees(),
+        true_anomaly: elements.true_anomaly.to_degrees(),
     };
 
     let j = match serde_json::to_string(&values) {
@@ -210,6 +225,7 @@ fn print_intro() {
 }
 
 // Function to read input JSON using serde and std lib
+#[allow(unused)]
 fn read_vectors_from_file<P: AsRef<Path>>(path: P) -> Result<PositionVector, Box<dyn Error>> {
     // Open the file in read-only mode with buffer.
     let file = File::open(path)?;

@@ -1,25 +1,25 @@
-use satkit::consts::MU_SUN;
 use std::f64::consts::PI;
 
 use nalgebra::Vector3;
 
 pub struct Elements {
-    angular_momentum: f64,      // kg * m^2 / s
-    inclination: f64,           //rad
-    raan: f64,                  // rad
-    eccentricity: f64,          // dimensionless
-    argument_of_periapsis: f64, // rad
-    true_anomaly: f64,          // rad
+    pub angular_momentum: f64,      // kg * m^2 / s
+    pub inclination: f64,           //rad
+    pub raan: f64,                  // rad
+    pub eccentricity: f64,          // dimensionless
+    pub argument_of_periapsis: f64, // rad
+    pub true_anomaly: f64,          // rad
 }
 
+#[allow(unused)]
 impl Elements {
-    pub fn period(&self) {
-        let a = self.seminajor_axis();
-        2. * PI / MU_SUN.sqrt() * a.powf(1.5);
+    pub fn period(&self, mu: f64) -> f64 {
+        let a = self.seminajor_axis(mu);
+        2. * PI / mu.sqrt() * a.powf(1.5)
     }
-    pub fn seminajor_axis(&self) -> f64 {
-        let r_p = self.periapsis();
-        let r_a = self.apoapsis();
+    pub fn seminajor_axis(&self, mu: f64) -> f64 {
+        let r_p = self.periapsis(mu);
+        let r_a = self.apoapsis(mu);
         0.5 * (r_p + r_a)
     }
     pub fn eccentric_anomaly(&self) -> f64 {
@@ -33,22 +33,22 @@ impl Elements {
 
         e1 - (mag_e * e1.sin())
     }
-    pub fn time_since_perapsis(&self) -> f64 {
+    pub fn time_since_perapsis(&self, mu: f64) -> f64 {
         let mag_h = self.angular_momentum;
         let mag_e = self.eccentricity;
         let me1 = self.mean_anomaly();
 
-        (mag_h.powi(3) / MU_SUN.powi(2)) * 1. / (1. - mag_e.powi(2)).powf(1.5) * me1
+        (mag_h.powi(3) / mu.powi(2)) * 1. / (1. - mag_e.powi(2)).powf(1.5) * me1
     }
-    pub fn periapsis(&self) -> f64 {
+    pub fn periapsis(&self, mu: f64) -> f64 {
         let mag_h = self.angular_momentum;
         let mag_e = self.eccentricity;
-        (mag_h.powi(2) / MU_SUN) * 1. / (1. + mag_e * 0_f64.cos())
+        (mag_h.powi(2) / mu) * 1. / (1. + mag_e * 0_f64.cos())
     }
-    pub fn apoapsis(&self) -> f64 {
+    pub fn apoapsis(&self, mu: f64) -> f64 {
         let mag_h = self.angular_momentum;
         let mag_e = self.eccentricity;
-        (mag_h.powi(2) / MU_SUN) * 1. / (1. + mag_e * 180_f64.to_radians().cos())
+        (mag_h.powi(2) / mu) * 1. / (1. + mag_e * 180_f64.to_radians().cos())
     }
 }
 
@@ -62,7 +62,7 @@ impl Elements {
 //         (t_1): time since pariapsis
 //         (r_p): Periapsis [m]
 //         (r_a): Apoapsis [m]
-pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>) -> Elements {
+pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>, mu: f64) -> Elements {
     // Distance (r)
     let mag_r = r.magnitude();
 
@@ -104,7 +104,7 @@ pub fn get_elements(r: Vector3<f64>, v: Vector3<f64>) -> Elements {
     }
 
     // Eccentricity Vecotor (e)
-    let e = (1. / MU_SUN) * ((mag_v.powi(2) - (MU_SUN / mag_r)) * &r - (mag_r * vr * &v));
+    let e = (1. / mu) * ((mag_v.powi(2) - (mu / mag_r)) * &r - (mag_r * vr * &v));
 
     // Eccentricity                                         =>> 4th Element
     let mag_e = e.magnitude();

@@ -2,6 +2,8 @@
 
 A lightweight and focused implementation of **Lambert’s Problem** in Rust, designed to compute orbital transfer velocities between two position vectors given a time of flight.
 
+**LIMITATIONS**: hyperbolic solution handling -> will return an Error
+
 ---
 
 ## Overview

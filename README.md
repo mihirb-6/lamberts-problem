@@ -65,7 +65,7 @@ Key components include:
 
 This project serves as both:
 
-* A **technical exercise in orbital mechanics**, and
+* A **technical exercise in orbital mechanics**
 * A **foundation for more advanced astrodynamics simulations**, including N-body systems and trajectory optimization
 
 It reflects a broader commitment to developing tools for scientific computing and spaceflight analysis.

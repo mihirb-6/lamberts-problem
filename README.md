@@ -56,7 +56,6 @@ The implementation follows a classical formulation of Lambert’s problem, solvi
 Key components include:
 
 * Transfer angle determination via cross and dot products
-* Handling edge cases (e.g., collinear vectors, 0°/360° transfer angles)
 * Root-finding for convergence on orbital parameters
 
 
@@ -76,6 +75,7 @@ It reflects a broader commitment to developing tools for scientific computing an
 ## Future Work
 
 * Improved error handling
+* Edge case handling
 * Improved numerical stability and convergence methods
 * Integration with ephemeris data
 * Visualization of standard + transfer orbits
